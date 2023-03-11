@@ -1,0 +1,41 @@
+version: '3'
+
+vars:
+  DOCKER_TAG: latest
+
+tasks:
+
+  clean:
+    cmds:
+      - docker rm
+
+  build-java:
+    cmds:
+      - ./gradlew clean
+      - ./gradlew build
+
+  build-docker:
+    cmds:
+      - docker build -t corpdash/corpdash-core:{{.DOCKER_TAG}} .
+
+  run:
+    cmds:
+      - task: package
+      - docker run --rm -p 8000:8000 --name corpdash_core corpdash/corpdash-core:latest
+
+  package:
+    cmds:
+      - task: build-java
+      - task: build-docker
+
+  dep:
+    cmds:
+      - docker compose up -d
+
+  dep-stop:
+    cmds:
+      - docker compose stop
+
+  dep-remove:
+    cmds:
+      - docker compose down --volumes
